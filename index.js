@@ -109,7 +109,6 @@ pass ID to store data function
 
 in the store data function, check if the ID is passed and if it is, find the item by id, edit properties and save to db
 */
-
 };
 
 // button click
