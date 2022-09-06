@@ -14,6 +14,42 @@ const emptyFields = function () {
   document.getElementById("username").value = "";
 };
 
+// push values to form fields
+const toFormFields = function (fn, ln, un) {
+  document.getElementById("firstName").value = fn;
+  document.getElementById("lastName").value = ln;
+  document.getElementById("username").value = un;
+};
+
+let indexTrack; // tracking index of items in db
+let idTrack;  // tracking ID of items in db
+
+// switch button
+const switchButton = function () {
+  const submit = document.getElementById("submit");
+
+  if (submit) {
+
+    const edit = document.createElement("button");
+    edit.classList.add("btn", "btn-warning");
+    edit.innerHTML = "Update";
+    edit.setAttribute("id", "update");
+
+    submit.parentNode.append(edit);
+    submit.remove();
+  } else {
+    const edit = document.getElementById("update");
+
+    const submitBtn = document.createElement("button");
+    submitBtn.classList.add("btn", "btn-primary");
+    submitBtn.innerHTML = "Submit";
+    submitBtn.setAttribute("id", "submit");
+
+    edit.parentNode.append(submitBtn);
+    edit.remove();
+  }
+};
+
 // store data in db
 const storeData = () => {
   const { firstName, lastName, userName } = getValues();
@@ -44,20 +80,22 @@ const displayData = () => {
 
   // creating package element
   const pckage = document.createElement("div");
-  const packageClasses = ["row", "px-2", "grid", "gap-3"];
+  pckage.classList.add(
+    "row",
+    "px-2",
+    "grid",
+    "gap-3",
+    "animate__animated",
+    "animate__pulse"
+  );
+
   pckage.setAttribute("id", "dataBody");
-  packageClasses.forEach((e) => {
-    pckage.classList.add(e);
-  });
 
   // creating package element
   users.forEach((user) => {
     const pack = document.createElement("div");
-    const packClasses = ["card", "g-col-4", "bg-dark", "text-white"];
+    pack.classList.add("card", "g-col-4", "bg-dark", "text-white");
     pack.style.width = "18rem";
-    packClasses.forEach((e) => {
-      pack.classList.add(e);
-    });
 
     // pass data into dom
     const { id, first_name, last_name, username } = user;
@@ -66,7 +104,7 @@ const displayData = () => {
         <h5 class="card-title fName">${first_name}</h5>
         <h6 class="card-subtitle mb-2 text-muted lName">${last_name}</h6>
         <p class="card-text uName">${username}</p>
-        <a href="#" onclick="editData(${id})"  class="card-link text-warning ed-btn">Edit</a>
+        <a href="#" data-id="${id}" onClick="editData(this)" class="card-link text-warning ed-btn">Edit</a>
         <a href="#" onclick="deleteData(${id})" class="card-link text-danger del-btn">Delete</a>
     </div>
     `;
@@ -99,9 +137,31 @@ const deleteData = (_id) => {
   displayData();
 };
 
-// edit item
-const editData = (_id) => {
-  console.log(_id);
+// edit button on DOM
+const editData = (element) => {
+  // extract ID
+  const _id = parseInt(element.getAttribute("data-id"));
+
+  // pull out database info
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  if (users == []) return;
+
+  // Check for matching data
+  users.forEach((user, index) => {
+    const { id, first_name, last_name, username } = user;
+
+    if (id === _id) {
+      // switch card color
+      element.parentNode.parentNode.classList.remove("bg-dark", "text-white");
+      element.parentNode.parentNode.classList.add("bg-edit", "text-dark");
+      // send data to form fields
+      toFormFields(first_name, last_name, username);
+      switchButton();
+      indexTrack = index;
+      idTrack = id
+      document.getElementById("update").addEventListener("click", updateData);
+    }
+  });
 
   /* 
 find in db by ID and send to the form
@@ -109,6 +169,26 @@ pass ID to store data function
 
 in the store data function, check if the ID is passed and if it is, find the item by id, edit properties and save to db
 */
+};
+
+// update button on DOM
+const updateData = () => {
+  const { firstName, lastName, userName } = getValues();
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  
+  // replace item with update
+  users.splice(indexTrack, 1, {
+    id: idTrack,
+    first_name: firstName,
+    last_name: lastName,
+    username: userName,
+  });
+  
+  localStorage.setItem("users", JSON.stringify(users));
+
+  switchButton();
+  displayData();
+  emptyFields();
 };
 
 // button click
