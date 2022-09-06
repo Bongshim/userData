@@ -22,18 +22,18 @@ const toFormFields = function (fn, ln, un) {
 };
 
 let indexTrack; // tracking index of items in db
-let idTrack;  // tracking ID of items in db
+let idTrack; // tracking ID of items in db
 
 // switch button
 const switchButton = function () {
   const submit = document.getElementById("submit");
 
   if (submit) {
-
     const edit = document.createElement("button");
     edit.classList.add("btn", "btn-warning");
     edit.innerHTML = "Update";
     edit.setAttribute("id", "update");
+    // edit.setAttribute("onClick", "updateData()")
 
     submit.parentNode.append(edit);
     submit.remove();
@@ -157,25 +157,26 @@ const editData = (element) => {
       // send data to form fields
       toFormFields(first_name, last_name, username);
       switchButton();
+
       indexTrack = index;
-      idTrack = id
+      idTrack = id;
       document.getElementById("update").addEventListener("click", updateData);
     }
   });
 
   /* 
-find in db by ID and send to the form
-pass ID to store data function
+  -- change colors of siblings to dark background when you click on another item 
+  ----[https://www.javascripttutorial.net/javascript-dom/javascript-siblings/, 
+        https://stackoverflow.com/questions/842336/is-there-a-way-to-select-sibling-nodes]
 
-in the store data function, check if the ID is passed and if it is, find the item by id, edit properties and save to db
-*/
+  */
 };
 
 // update button on DOM
 const updateData = () => {
   const { firstName, lastName, userName } = getValues();
   const users = JSON.parse(localStorage.getItem("users")) || [];
-  
+
   // replace item with update
   users.splice(indexTrack, 1, {
     id: idTrack,
@@ -183,7 +184,7 @@ const updateData = () => {
     last_name: lastName,
     username: userName,
   });
-  
+
   localStorage.setItem("users", JSON.stringify(users));
 
   switchButton();
